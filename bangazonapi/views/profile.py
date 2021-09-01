@@ -114,8 +114,8 @@ class Profile(ViewSet):
             try:
                 open_order = Order.objects.get(
                     customer=current_user, payment_type=None)
-                line_items = OrderProduct.objects.filter(order=open_order)
-                line_items.delete()
+                lineitems = OrderProduct.objects.filter(order=open_order)
+                lineitems.delete()
                 open_order.delete()
             except Order.DoesNotExist as ex:
                 return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
@@ -138,9 +138,9 @@ class Profile(ViewSet):
             @apiSuccess (200) {Object} payment_type Payment Id used to complete order
             @apiSuccess (200) {String} customer URI for customer
             @apiSuccess (200) {Number} size Number of items in cart
-            @apiSuccess (200) {Object[]} line_items Line items in cart
-            @apiSuccess (200) {Number} line_items.id Line item id
-            @apiSuccess (200) {Object} line_items.product Product in cart
+            @apiSuccess (200) {Object[]} lineitems Line items in cart
+            @apiSuccess (200) {Number} lineitems.id Line item id
+            @apiSuccess (200) {Object} lineitems.product Product in cart
             @apiSuccessExample {json} Success
                 {
                     "id": 2,
@@ -148,7 +148,7 @@ class Profile(ViewSet):
                     "created_date": "2019-04-12",
                     "payment_type": null,
                     "customer": "http://localhost:8000/customers/7",
-                    "line_items": [
+                    "lineitems": [
                         {
                             "id": 4,
                             "product": {
@@ -177,15 +177,15 @@ class Profile(ViewSet):
             try:
                 open_order = Order.objects.get(
                     customer=current_user, payment_type=None)
-                line_items = OrderProduct.objects.filter(order=open_order)
-                line_items = LineItemSerializer(
-                    line_items, many=True, context={'request': request})
+                lineitems = OrderProduct.objects.filter(order=open_order)
+                lineitems = LineItemSerializer(
+                    lineitems, many=True, context={'request': request})
 
                 cart = {}
                 cart["order"] = OrderSerializer(open_order, many=False, context={
                                                 'request': request}).data
-                cart["order"]["line_items"] = line_items.data
-                cart["order"]["size"] = len(line_items.data)
+                cart["order"]["lineitems"] = lineitems.data
+                cart["order"]["size"] = len(lineitems.data)
 
             except Order.DoesNotExist as ex:
                 return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
@@ -202,10 +202,10 @@ class Profile(ViewSet):
             @apiHeaderExample {String} Authorization
                 Token 9ba45f09651c5b0c404f37a2d2572c026c146611
 
-            @apiSuccess (200) {Object} line_item Line items in cart
-            @apiSuccess (200) {Number} line_item.id Line item id
-            @apiSuccess (200) {Object} line_item.product Product in cart
-            @apiSuccess (200) {Object} line_item.order Open order for cart
+            @apiSuccess (200) {Object} lineitem Line items in cart
+            @apiSuccess (200) {Number} lineitem.id Line item id
+            @apiSuccess (200) {Object} lineitem.product Product in cart
+            @apiSuccess (200) {Object} lineitem.order Open order for cart
             @apiSuccessExample {json} Success
                 {
                     "id": 14,
@@ -242,16 +242,16 @@ class Profile(ViewSet):
                 open_order.customer = current_user
                 open_order.save()
 
-            line_item = OrderProduct()
-            line_item.product = Product.objects.get(
+            lineitem = OrderProduct()
+            lineitem.product = Product.objects.get(
                 pk=request.data["product_id"])
-            line_item.order = open_order
-            line_item.save()
+            lineitem.order = open_order
+            lineitem.save()
 
-            line_item_json = LineItemSerializer(
-                line_item, many=False, context={'request': request})
+            lineitem_json = LineItemSerializer(
+                lineitem, many=False, context={'request': request})
 
-            return Response(line_item_json.data)
+            return Response(lineitem_json.data)
 
         return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
